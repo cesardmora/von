@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case dei Nobili | Una colección de cinco siglos en Korčula</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --stone: #E8E4DD;
+      --stone-light: #F5F2ED;
+      --stone-dark: #C9C3B8;
+      --patina: #B8956B;
+      --patina-light: #D4B896;
+      --adriatic: #1A3A4A;
+      --adriatic-deep: #0D1F28;
+      --ink: #1A1917;
+      --ink-soft: #3D3B38;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--stone-light);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--stone);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--patina);
+      border-radius: 3px;
+    }
+
+    /* Navigation */
+    .nav-scrolled {
+      background: rgba(245, 242, 237, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 0 var(--stone-dark);
+    }
+
+    .nav-scrolled .nav-logo {
+      opacity: 1;
+    }
+
+    .nav-logo {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Hero */
+    .hero-section {
+      height: 100vh;
+      min-height: 700px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--adriatic-deep) 0%, var(--adriatic) 50%, #2A4A5A 100%);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(184, 149, 107, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 80% at 20% 80%, rgba(26, 58, 74, 0.3) 0%, transparent 50%);
+    }
+
+    .hero-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='%23B8956B' fill-opacity='1'/%3E%3C/svg%3E");
+      background-size: 60px 60px;
+    }
+
+    /* Grain texture */
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Property cards */
+    .property-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .property-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(13, 31, 40, 0.8) 0%, rgba(13, 31, 40, 0.2) 40%, transparent 70%);
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    .property-card:hover::before {
+      opacity: 0.7;
+    }
+
+    .property-card:hover .property-image {
+      transform: scale(1.05);
+    }
+
+    .property-card:hover .property-title {
+      transform: translateY(-8px);
+    }
+
+    .property-card:hover .property-line {
+      width: 80px;
+    }
+
+    .property-image {
+      transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .property-title {
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .property-line {
+      width: 40px;
+      height: 1px;
+      background: var(--patina);
+      transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                  transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* Private access section */
+    .private-section {
+      background: var(--adriatic-deep);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .private-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(184, 149, 107, 0.08) 0%, transparent 50%);
+      animation: rotateGlow 30s linear infinite;
+    }
+
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Chapter number */
+    .chapter-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 120px;
+      font-weight: 300;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--patina);
+      opacity: 0.3;
+    }
+
+    /* Button styles */
+    .btn-editorial {
+      position: relative;
+      padding: 16px 40px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--stone-light);
+      background: transparent;
+      border: 1px solid rgba(184, 149, 107, 0.5);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+
+    .btn-editorial::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--patina);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: -1;
+    }
+
+    .btn-editorial:hover::before {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .btn-editorial:hover {
+      border-color: var(--patina);
+    }
+
+    .btn-editorial:focus-visible {
+      outline: 2px solid var(--patina);
+      outline-offset: 4px;
+    }
+
+    /* Horizontal line animation */
+    .line-reveal {
+      width: 0;
+      transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .line-reveal.visible {
+      width: 100%;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .chapter-number {
+        font-size: 80px;
+      }
+      .hero-section {
+        min-height: 600px;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+      .line-reveal {
+        width: 100%;
+      }
+    }
+
+    /* Century badge */
+    .century-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(184, 149, 107, 0.1);
+      border: 1px solid rgba(184, 149, 107, 0.3);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--patina);
+    }
+
+    /* Smooth image loading */
+    .img-loading {
+      background: linear-gradient(90deg, var(--stone) 0%, var(--stone-light) 50%, var(--stone) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Grain overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav id="mainNav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-700">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="flex items-center justify-between h-20 lg:h-24">
+        <!-- Logo -->
+        <a href="#" class="nav-logo font-display text-2xl lg:text-3xl tracking-wide" style="color: var(--ink);">
+          Case dei Nobili
+        </a>
+        
+        <!-- Navigation links -->
+        <div class="hidden md:flex items-center gap-12">
+          <a href="#coleccion" class="text-xs tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity" style="color: var(--ink);">La Colección</a>
+          <a href="#historia" class="text-xs tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity" style="color: var(--ink);">Historia</a>
+          <a href="#bodas" class="text-xs tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity" style="color: var(--ink);">Bodas</a>
+          <a href="#contacto" class="text-xs tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity" style="color: var(--ink);">Contacto</a>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button id="mobileMenuBtn" class="md:hidden p-2" aria-label="Abrir menú">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <line x1="4" y1="8" x2="20" y2="8"></line>
+            <line x1="4" y1="16" x2="20" y2="16"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="fixed inset-0 z-40 hidden" style="background: var(--stone-light);">
+    <div class="flex flex-col items-center justify-center h-full gap-8">
+      <a href="#coleccion" class="font-display text-3xl" style="color: var(--ink);">La Colección</a>
+      <a href="#historia" class="font-display text-3xl" style="color: var(--ink);">Historia</a>
+      <a href="#bodas" class="font-display text-3xl" style="color: var(--ink);">Bodas</a>
+      <a href="#contacto" class="font-display text-3xl" style="color: var(--ink);">Contacto</a>
+      <button id="closeMobileMenu" class="mt-8 text-xs tracking-widest uppercase" style="color: var(--patina);">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-pattern" aria-hidden="true"></div>
+    
+    <!-- Hero content -->
+    <div class="relative z-10 h-full flex flex-col justify-center px-6 lg:px-12">
+      <div class="max-w-7xl mx-auto w-full">
+        <div class="max-w-3xl">
+          <!-- Pre-title -->
+          <p class="text-xs tracking-widest uppercase mb-8 opacity-60" style="color: var(--stone);">
+            Korčula, Croacia
+          </p>
+          
+          <!-- Main title -->
+          <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-tight mb-8" style="color: var(--stone-light);">
+            Una colección de<br>
+            <em class="font-normal" style="color: var(--patina-light);">cinco siglos</em>
+          </h1>
+          
+          <!-- Subtitle -->
+          <p class="text-lg md:text-xl font-light leading-relaxed mb-12 max-w-xl" style="color: var(--stone); opacity: 0.8;">
+            Cuatro residencias históricas en la isla de Korčula. Cada una, un capítulo habitable de la historia dálmeta.
+          </p>
+          
+          <!-- CTA -->
+          <a href="#coleccion" class="btn-editorial inline-block">
+            Explorar la colección
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-10">
+      <div class="flex flex-col items-center gap-4 opacity-50">
+        <span class="text-xs tracking-widest uppercase" style="color: var(--stone);">Descubrir</span>
+        <div class="w-px h-16 relative overflow-hidden" style="background: rgba(245, 242, 237, 0.3);">
+          <div class="absolute top-0 left-0 w-full h-1/2 animate-pulse" style="background: var(--patina);"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Intro Section -->
+  <section class="py-24 lg:py-40 px-6 lg:px-12" style="background: var(--stone-light);">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+        <div class="reveal">
+          <p class="text-xs tracking-widest uppercase mb-6" style="color: var(--patina);">
+            La Piedra y el Mar
+          </p>
+          <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-light leading-tight mb-8" style="color: var(--ink);">
+            Donde la piedra<br>
+            <em class="italic" style="color: var(--adriatic);">encuentra al mar</em>
+          </h2>
+          <div class="w-24 h-px mb-8 line-reveal" style="background: var(--patina);"></div>
+        </div>
+        <div class="reveal reveal-delay-2">
+          <p class="text-base lg:text-lg font-light leading-relaxed mb-6" style="color: var(--ink-soft);">
+            Case dei Nobili nace de la pasión por preservar el patrimonio arquitectónico de Korčula. Cada propiedad ha sido restaurada con meticulosidad, honrando su origen mientras se adapta al confort contemporáneo.
+          </p>
+          <p class="text-base lg:text-lg font-light leading-relaxed" style="color: var(--ink-soft);">
+            No son alojamientos. Son portales a otros tiempos, donde la luz adriática atraviesa ventanas góticas y el silencio de la piedra caliza cuenta historias de mercaderes y nobles venecianos.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collection Section -->
+  <section id="coleccion" class="py-24 lg:py-32 px-6 lg:px-12" style="background: var(--stone);">
+    <div class="max-w-7xl mx-auto">
+      <!-- Section header -->
+      <div class="text-center mb-20 reveal">
+        <p class="text-xs tracking-widest uppercase mb-4" style="color: var(--patina);">
+          Capítulo I
+        </p>
+        <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-light" style="color: var(--ink);">
+          La Colección
+        </h2>
+      </div>
+
+      <!-- Properties grid -->
+      <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+        
+        <!-- Property 1: Dúplex s.XIV -->
+        <div class="property-card h-96 lg:h-[500px] reveal reveal-delay-1">
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" 
+            alt="Dúplex del siglo XIV"
+            class="property-image absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 lg:p-10">
+            <span class="century-badge mb-4 w-fit">
+              <span>Siglo XIV</span>
+            </span>
+            <h3 class="property-title font-display text-3xl lg:text-4xl font-light mb-2" style="color: var(--stone-light);">
+              El Dúplex
+            </h3>
+            <div class="property-line mb-4"></div>
+            <p class="text-sm font-light mb-4 max-w-xs" style="color: var(--stone); opacity: 0.8;">
+              Dos plantas de historia medieval en el corazón de la Ciudad Vieja.
+            </p>
+            <p class="text-xs tracking-widest uppercase" style="color: var(--patina-light);">
+              4 huéspedes · 2 habitaciones
+            </p>
+          </div>
+        </div>
+
+        <!-- Property 2: Palacio Gótico -->
+        <div class="property-card h-96 lg:h-[500px] reveal reveal-delay-2">
+          <img 
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80" 
+            alt="Palacio Gótico"
+            class="property-image absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 lg:p-10">
+            <span class="century-badge mb-4 w-fit">
+              <span>Siglo XV</span>
+            </span>
+            <h3 class="property-title font-display text-3xl lg:text-4xl font-light mb-2" style="color: var(--stone-light);">
+              Palacio Gótico
+            </h3>
+            <div class="property-line mb-4"></div>
+            <p class="text-sm font-light mb-4 max-w-xs" style="color: var(--stone); opacity: 0.8;">
+              Former noble residence with original Gothic arches and vaulted ceilings.
+            </p>
+            <p class="text-xs tracking-widest uppercase" style="color: var(--patina-light);">
+              6 huéspedes · 3 habitaciones
+            </p>
+          </div>
+        </div>
+
+        <!-- Property 3: Casa Renacentista -->
+        <div class="property-card h-96 lg:h-[500px] reveal reveal-delay-3">
+          <img 
+            src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80" 
+            alt="Casa Renacentista"
+            class="property-image absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 z-10 flex flex-col justify-end p-8 lg:p-10">
+            <span class="century-badge mb-4 w-fit">
+              <span>Siglo XVI</span>
+            </span>
+            <h3 class="property-title font-display text-3xl lg:text-4xl font-light mb-2" style="color: var(--stone-light);">
+              Casa Renacentista
+            </h3>
+            <div class="property-line mb-4"></div>
+            <p class="text-sm font-light mb-4 max-w-xs" style="color: var(--stone); opacity: 0.8;">
+              Elegancia renacentista con vistas al canal de Korčula.
+            </p>
+            <p class="text-xs tracking-widest uppercase" style="color: var(--patina-light);">
+              8 huéspedes · 4 habitaciones
+            </p>
+          </div>
+        </div>
+
+        <!-- Property 4: KPK House (Coming Soon) -->
+        <div class="property-card h-96 lg:h-[500px] reveal reveal-delay-4" style="background: var(--adriatic-deep);">
+          <div class="absolute inset-0 z-10 flex flex-col justify-center items-center text-center p-8">
+            <span class="text-xs tracking-widest uppercase mb-6" style="color: var(--patina);">
+              Próximamente
+            </span>
+            <h3 class="font-display text-3xl lg:text-4xl font-light mb-4" style="color: var(--stone-light);">
+              KPK House
+            </h3>
+            <div class="w-12 h-px mb-4" style="background: var(--patina);"></div>
+            <p class="text-sm font-light max-w-xs" style="color: var(--stone); opacity: 0.6;">
+              Una nueva joya se suma a la colección. Revelación en 2025.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- History/Philosophy Section -->
+  <section id="historia" class="py-24 lg:py-40 px-6 lg:px-12 relative overflow-hidden" style="background: var(--stone-light);">
+    <!-- Decorative element -->
+    <div class="absolute top-0 right-0 w-1/2 h-full hidden lg:block" aria-hidden="true">
+      <div class="chapter-number absolute top-1/2 right-12 transform -translate-y-1/2">
+        V
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="grid lg:grid-cols-2 gap-16 lg:gap-24">
+        
+        <!-- Left: Image -->
+        <div class="reveal order-2 lg:order-1">
+          <div class="relative aspect-[4/5]">
+            <img 
+              src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80" 
+              alt="Detalle arquitectónico de piedra caliza"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            >
+            <!-- Overlay info -->
+            <div class="absolute bottom-0 left-0 right-0 p-8" style="background: linear-gradient(to top, rgba(13, 31, 40, 0.8), transparent);">
+              <p class="text-xs tracking-widest uppercase" style="color: var(--patina-light);">
+                Piedra caliza de Korčula
+              </p>
+              <p class="font-display text-lg mt-1" style="color: var(--stone-light);">
+                Extraída de las canteras de la isla durante cinco siglos
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Content -->
+        <div class="flex flex-col justify-center order-1 lg:order-2">
+          <div class="reveal">
+            <p class="text-xs tracking-widest uppercase mb-6" style="color: var(--patina);">
+              Nuestra Filosofía
+            </p>
+            <h2 class="font-display text-4xl md:text-5xl font-light leading-tight mb-8" style="color: var(--ink);">
+              Preservar para<br>
+              <em class="italic" style="color: var(--adriatic);">habitar</em>
+            </h2>
+          </div>
+          
+          <div class="reveal reveal-delay-2">
+            <div class="w-24 h-px mb-8" style="background: var(--patina);"></div>
+            <p class="text-base lg:text-lg font-light leading-relaxed mb-6" style="color: var(--ink-soft);">
+              Cada restauración es un acto de reverencia. Trabajamos con artesanos locales, utilizando técnicas centenarias y materiales de la isla, para que cada casa mantenga su alma intacta.
+            </p>
+            <p class="text-base lg:text-lg font-light leading-relaxed mb-8" style="color: var(--ink-soft);">
+              No creamos espacios para turistas. Creamos hogares para viajeros que buscan habitar la historia, aunque sea por unos días.
+            </p>
+          </div>
+
+          <div class="reveal reveal-delay-3 grid grid-cols-3 gap-8 mt-8">
+            <div class="text-center">
+              <p class="font-display text-4xl lg:text-5xl font-light" style="color: var(--adriatic);">4</p>
+              <p class="text-xs tracking-widest uppercase mt-2" style="color: var(--ink-soft);">Propiedades</p>
+            </div>
+            <div class="text-center">
+              <p class="font-display text-4xl lg:text-5xl font-light" style="color: var(--adriatic);">V</p>
+              <p class="text-xs tracking-widest uppercase mt-2" style="color: var(--ink-soft);">Siglos</p>
+            </div>
+            <div class="text-center">
+              <p class="font-display text-4xl lg:text-5xl font-light" style="color: var(--adriatic);">1</p>
+              <p class="text-xs tracking-widest uppercase mt-2" style="color: var(--ink-soft);">Isla</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Weddings Section (Private Access) -->
+  <section id="bodas" class="private-section py-24 lg:py-40 px-6 lg:px-12">
+    <div class="max-w-7xl mx-auto relative z-10">
+      
+      <!-- Header -->
+      <div class="text-center mb-16 reveal">
+        <div class="inline-flex items-center gap-3 px-5 py-2 border mb-8" style="border-color: rgba(184, 149, 107, 0.3); border-radius: 2px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--patina);">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span class="text-xs tracking-widest uppercase" style="color: var(--patina);">Acceso Privado</span>
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-light mb-6" style="color: var(--stone-light);">
+          Bodas en Case dei Nobili
+        </h2>
+        <p class="text-base lg:text-lg font-light max-w-2xl mx-auto" style="color: var(--stone); opacity: 0.7;">
+          Exclusivo para wedding planners y agencias de lujo
+        </p>
+      </div>
+
+      <!-- Content grid -->
+      <div class="grid lg:grid-cols-3 gap-8 lg:gap-12">
+        
+        <!-- Feature 1 -->
+        <div class="reveal reveal-delay-1 p-8 lg:p-10 border" style="border-color: rgba(184, 149, 107, 0.2); background: rgba(13, 31, 40, 0.3);">
+          <div class="w-10 h-10 flex items-center justify-center mb-6 border" style="border-color: var(--patina);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--patina);">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <h3 class="font-display text-2xl font-light mb-4" style="color: var(--stone-light);">
+            Espacios Únicos
+          </h3>
+          <p class="text-sm font-light leading-relaxed" style="color: var(--stone); opacity: 0.7;">
+            Patios medievales, terrazas con vistas al Adriático y salones históricos para celebraciones íntimas o eventos exclusivos de hasta 80 invitados.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="reveal reveal-delay-2 p-8 lg:p-10 border" style="border-color: rgba(184, 149, 107, 0.2); background: rgba(13, 31, 40, 0.3);">
+          <div class="w-10 h-10 flex items-center justify-center mb-6 border" style="border-color: var(--patina);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--patina);">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3 class="font-display text-2xl font-light mb-4" style="color: var(--stone-light);">
+            Alojamiento Integral
+          </h3>
+          <p class="text-sm font-light leading-relaxed" style="color: var(--stone); opacity: 0.7;">
+            Alojamiento para la familia nupcial en nuestras propiedades históricas. Cada habitación cuenta una historia, cada amanecer es una promesa.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="reveal reveal-delay-3 p-8 lg:p-10 border" style="border-color: rgba(184, 149, 107, 0.2); background: rgba(13, 31, 40, 0.3);">
+          <div class="w-10 h-10 flex items-center justify-center mb-6 border" style="border-color: var(--patina);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--patina);">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3 class="font-display text-2xl font-light mb-4" style="color: var(--stone-light);">
+            Red de Colaboradores
+          </h3>
+          <p class="text-sm font-light leading-relaxed" style="color: var(--stone); opacity: 0.7;">
+            Acceso a nuestra curaduría de proveedores locales: chefs privados, floristas, fotógrafos y músicos que conocen cada rincón de nuestras casas.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- CTA -->
+      <div class="text-center mt-16 reveal reveal-delay-4">
+        <p class="text-sm font-light mb-8 max-w-lg mx-auto" style="color: var(--stone); opacity: 0.6;">
+          Solicite acceso a nuestro dossier exclusivo para profesionales. Respuesta en 48 horas.
+        </p>
+        <button class="btn-editorial">
+          Solicitar Dossier
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Contact/Footer Section -->
+  <footer id="contacto" class="py-24 lg:py-32 px-6 lg:px-12" style="background: var(--ink);">
+    <div class="max-w-7xl mx-auto">
+      
+      <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 mb-16">
+        
+        <!-- Left: Contact info -->
+        <div class="reveal">
+          <p class="text-xs tracking-widest uppercase mb-6" style="color: var(--patina);">
+            Contacto
+          </p>
+          <h2 class="font-display text-4xl md:text-5xl font-light mb-8" style="color: var(--stone-light);">
+            Comience su<br>
+            <em class="italic" style="color: var(--patina-light);">historia</em>
+          </h2>
+          <p class="text-base font-light mb-8 max-w-md" style="color: var(--stone); opacity: 0.6;">
+            Cada reserva es una conversación. Cuéntenos sobre su viaje y le ayudaremos a encontrar la casa perfecta para su estancia en Korčula.
+          </p>
+          
+          <div class="space-y-4">
+            <a href="mailto:reservations@casedeinobili.com" class="block text-lg font-light hover:underline" style="color: var(--stone-light);">
+              reservations@casedeinobili.com
+            </a>
+            <p class="text-base font-light" style="color: var(--stone); opacity: 0.6;">
+              Korčula, Croacia
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Newsletter -->
+        <div class="reveal reveal-delay-2">
+          <p class="text-xs tracking-widest uppercase mb-6" style="color: var(--patina);">
+            Boletín
+          </p>
+          <h3 class="font-display text-2xl md:text-3xl font-light mb-6" style="color: var(--stone-light);">
+            Historias desde la isla
+          </h3>
+          <p class="text-sm font-light mb-8" style="color: var(--stone); opacity: 0.6;">
+            Reciba crónicas de Korčula, novedades de la colección y ofertas exclusivas antes que nadie.
+          </p>
+          
+          <form id="newsletterForm" class="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="email" 
+              placeholder="Su email"
+              required
+              class="flex-1 px-6 py-4 text-sm font-light border focus:outline-none focus:border-opacity-100"
+              style="background: transparent; border-color: rgba(184, 149, 107, 0.3); color: var(--stone-light);"
+              aria-label="Email para newsletter"
+            >
+            <button type="submit" class="btn-editorial whitespace-nowrap">
+              Suscribirse
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-6" style="border-color: rgba(184, 149, 107, 0.2);">
+        <p class="text-xs tracking-widest uppercase" style="color: var(--stone); opacity: 0.4;">
+          Case dei Nobili 2025
+        </p>
+        <div class="flex gap-8">
+          <a href="#" class="text-xs tracking-widest uppercase hover:underline" style="color: var(--stone); opacity: 0.4;">Política de Privacidad</a>
+          <a href="#" class="text-xs tracking-widest uppercase hover:underline" style="color: var(--stone); opacity: 0.4;">Términos</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    // Initialize all functionality after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      
+      // ===================
+      // Navigation scroll effect
+      // ===================
+      const nav = document.getElementById('mainNav');
+      let lastScroll = 0;
+      
+      function handleNavScroll() {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > 100) {
+          nav.classList.add('nav-scrolled');
+        } else {
+          nav.classList.remove('nav-scrolled');
+        }
+        
+        lastScroll = currentScroll;
+      }
+      
+      window.addEventListener('scroll', handleNavScroll, { passive: true });
+
+      // ===================
+      // Mobile menu
+      // ===================
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const closeMobileMenu = document.getElementById('closeMobileMenu');
+      const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+
+      function openMobileMenu() {
+        mobileMenu.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenuFn() {
+        mobileMenu.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      mobileMenuBtn.addEventListener('click', openMobileMenu);
+      closeMobileMenu.addEventListener('click', closeMobileMenuFn);
+      
+      mobileMenuLinks.forEach(function(link) {
+        link.addEventListener('click', closeMobileMenuFn);
+      });
+
+      // ===================
+      // Scroll reveal with IntersectionObserver
+      // ===================
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (!prefersReducedMotion) {
+        const revealElements = document.querySelectorAll('.reveal, .line-reveal');
+        
+        const revealObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.15,
+          rootMargin: '0px 0px -50px 0px'
+        });
+
+        revealElements.forEach(function(el) {
+          revealObserver.observe(el);
+        });
+      } else {
+        // If reduced motion, show everything immediately
+        document.querySelectorAll('.reveal').forEach(function(el) {
+          el.classList.add('visible');
+        });
+        document.querySelectorAll('.line-reveal').forEach(function(el) {
+          el.classList.add('visible');
+        });
+      }
+
+      // ===================
+      // Smooth scroll for anchor links
+      // ===================
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const target = document.querySelector(targetId);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({
+              behavior: prefersReducedMotion ? 'auto' : 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // ===================
+      // Newsletter form
+      // ===================
+      const newsletterForm = document.getElementById('newsletterForm');
+      
+      newsletterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+        
+        // Simulate submission
+        const button = this.querySelector('button');
+        const originalText = button.textContent;
+        button.textContent = 'Enviado';
+        button.disabled = true;
+        
+        setTimeout(function() {
+          button.textContent = originalText;
+          button.disabled = false;
+          newsletterForm.reset();
+        }, 2000);
+      });
+
+      // ===================
+      // Parallax effect for hero (subtle)
+      // ===================
+      if (!prefersReducedMotion) {
+        const heroSection = document.querySelector('.hero-section');
+        
+        window.addEventListener('scroll', function() {
+          const scrolled = window.pageYOffset;
+          const heroHeight = heroSection.offsetHeight;
+          
+          if (scrolled < heroHeight) {
+            const parallaxAmount = scrolled * 0.3;
+            heroSection.querySelector('.hero-bg').style.transform = 'translateY(' + parallaxAmount + 'px)';
+          }
+        }, { passive: true });
+      }
+
+    });
+  </script>
+</body>
+</html>
